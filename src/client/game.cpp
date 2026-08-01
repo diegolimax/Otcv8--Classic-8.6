@@ -22,6 +22,7 @@
 
 #include "game.h"
 #include "localplayer.h"
+#include "weathermanager.h"
 #include "map.h"
 #include "tile.h"
 #include "creature.h"
@@ -74,6 +75,7 @@ void Game::terminate()
 
 void Game::resetGameStates()
 {
+    g_weatherManager.clear();
     m_online = false;
     m_denyBotCall = false;
     m_dead = false;
@@ -1395,7 +1397,8 @@ void Game::equipItem(const ItemPtr& item)
 {
     if (!item || !canPerformGameAction())
         return;
-    if (g_game.getFeature(Otc::GameThingUpgradeClassification) && item->getClassification() > 0)
+    if (g_game.getFeature(Otc::GameItemTierByte) ||
+        (g_game.getFeature(Otc::GameThingUpgradeClassification) && item->getClassification() > 0))
         m_protocolGame->sendEquipItemWithTier(item->getId(), item->getTier());
     else
         m_protocolGame->sendEquipItem(item->getId(), item->getCountOrSubType());
@@ -1406,7 +1409,8 @@ void Game::equipItemId(int itemId, int subType)
     if (!canPerformGameAction())
         return;
     const ThingTypePtr& thingType = g_things.getThingType(itemId, ThingCategoryItem);
-    if (g_game.getFeature(Otc::GameThingUpgradeClassification) && thingType && thingType->getClassification() > 0)
+    if (g_game.getFeature(Otc::GameItemTierByte) ||
+        (g_game.getFeature(Otc::GameThingUpgradeClassification) && thingType && thingType->getClassification() > 0))
         m_protocolGame->sendEquipItemWithTier(itemId, subType);
     else
         m_protocolGame->sendEquipItem(itemId, subType);
